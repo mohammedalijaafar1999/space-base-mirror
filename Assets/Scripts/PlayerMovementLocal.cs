@@ -5,6 +5,7 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.PlayerLoop;
+using Cinemachine;
 
 public class PlayerMovementLocal : NetworkBehaviour
 {
@@ -21,7 +22,19 @@ public class PlayerMovementLocal : NetworkBehaviour
         collider = GetComponent<Collider>();
     }
 
-    
+    public override void OnStartLocalPlayer() { 
+        Camera.main.transform.SetParent(this.transform, false);
+        var camera = FindObjectOfType<CinemachineFreeLook>();
+
+        if (camera)
+        {
+            camera.LookAt = gameObject.transform;
+            camera.Follow = gameObject.transform;
+        }
+
+    }
+
+
 
     private void FixedUpdate()
     {
@@ -46,11 +59,13 @@ public class PlayerMovementLocal : NetworkBehaviour
         rb.velocity = new Vector3(movement.x * speed, rb.velocity.y, movement.z * speed);
 
         var lookRotation = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-        if (lookRotation.magnitude > 0.2f)
+
+
+        if (lookRotation.magnitude > 0.2f && Keyboard.current.wKey.isPressed)
         {
             transform.rotation = Quaternion.LookRotation(movement);
         }
-        
+
         if (Keyboard.current.spaceKey.isPressed && IsGrounded())
         {
             Debug.Log("space pressed");
